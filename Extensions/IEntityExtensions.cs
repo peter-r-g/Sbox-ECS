@@ -138,4 +138,17 @@ public static class IEntityExtensions
 			yield return entity;
 		}
 	}
+
+	public static TComponent AsComponent<TComponent>( this IEntity entity )
+		where TComponent : IComponent
+	{
+		return entity.Components.Get<TComponent>();
+	}
+
+	public static (TComponent1, TComponent2) AsComponents<TComponent1, TComponent2>( this IEntity entity )
+		where TComponent1 : IComponent
+		where TComponent2 : IComponent
+	{
+		return (entity.Components.Get<TComponent1>(), entity.Components.Get<TComponent2>());
+	}
 }
