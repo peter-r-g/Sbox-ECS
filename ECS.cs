@@ -7,31 +7,19 @@ using System.Runtime.CompilerServices;
 
 namespace EntityComponentSystem;
 
-public static class ECS
+public sealed class ECS
 {
-	private static BaseGameManager? gameManager;
+	private readonly BaseGameManager? gameManager;
+	private readonly ECSConfiguration configuration;
 
-	public static void Init()
+	public ECS() : this( ECSConfiguration.Default ) { }
+	public ECS( ECSConfiguration configuration )
 	{
-		gameManager = Entity.All.OfType<BaseGameManager>().First();
+		this.configuration = configuration;
+		gameManager = Entity.All.OfType<BaseGameManager>().FirstOrDefault();
 
-		foreach ( var type in TypeLibrary.GetTypes<ECSSystem>() )
-		{
-			var systemCount = 0;
-			foreach ( var @interface in type.Interfaces )
-			{
-				if ( !@interface.IsAssignableTo( typeof( ISystem ) ) )
-					continue;
-
-				if ( @interface == typeof( ISystem ) || @interface == typeof( IClientSystem ) || @interface == typeof( IServerSystem ) )
-					continue;
-
-				systemCount++;
-			}
-
-			if ( systemCount > 1 )
-				Log.Error( $"{type.Name} implements more than one system, this is not supported" );
-		}
+		if ( gameManager is null )
+			throw new InvalidOperationException( "No game manager found, did you create this too early?" );
 	}
 
 	public void AddSystem<TSystem, TEntity>()
