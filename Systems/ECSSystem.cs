@@ -1,9 +1,9 @@
 ﻿using Sandbox;
 using System;
 
-namespace ECS;
+namespace EntityComponentSystem.Systems;
 
-public class System : EntityComponent
+public abstract class ECSSystem : EntityComponent, ISystem
 {
 	protected override void OnActivate()
 	{
