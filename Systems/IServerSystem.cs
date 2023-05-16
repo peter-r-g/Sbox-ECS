@@ -1,9 +1,5 @@
-﻿using Sandbox;
-using System.Collections.Generic;
-using System;
+﻿namespace EntityComponentSystem.Systems;
 
-namespace EntityComponentSystem.Systems;
-
-public interface IServerSystem : ISystem
+public interface IServerSystem
 {
 }
