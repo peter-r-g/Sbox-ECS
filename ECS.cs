@@ -34,38 +34,51 @@ public static class ECS
 		}
 	}
 
-	public static void AddSystem<T>() where T : ISystem, new()
+	public void AddSystem<TSystem, TEntity>()
+		where TSystem : ISystem<TEntity>, new()
+		where TEntity : IEntity
 	{
-		AssertGameManager();
+		if ( gameManager!.Components.Get<TSystem>() is not null )
+			throw new ArgumentException( $"A system of type {typeof( TSystem ).Name} already exists", nameof( TSystem ) );
 
-		if ( gameManager!.Components.Get<T>() is not null )
-			throw new ArgumentException( $"A system of type {typeof( T ).Name} already exists", nameof( T ) );
-
-		gameManager!.Components.Add( new T() );
+		gameManager!.Components.Add( new TSystem() );
 	}
 
-	public static void AddSystem( ISystem system )
+	public void AddSystem<TSystem>()
+		where TSystem : ISystem<IEntity>, new()
 	{
-		AssertGameManager();
+		AddSystem<TSystem, IEntity>();
+	}
 
+	public void AddSystem<TEntity>( ISystem<TEntity> system )
+		where TEntity : IEntity
+	{
 		gameManager!.Components.Add( system );
 	}
 
-	public static void Run<TSystem>( IEnumerable<IEntity> entities, params object[] args ) where TSystem : ISystem
+	public void Run<TSystem, TEntity>( IEnumerable<TEntity> entities, params object[] args )
+		where TSystem : ISystem<TEntity>
+		where TEntity : IEntity
 	{
-		AssertGameManager();
-
-		RunInternal<TSystem>( entities, args );
+		RunInternal<TSystem, TEntity>( entities, args );
 	}
 
-	public static void Run<TSystem>( params object[] args ) where TSystem : ISystem
+	public void Run<TSystem, TEntity>( params object[] args )
+		where TSystem : ISystem<TEntity>
+		where TEntity : IEntity
 	{
-		AssertGameManager();
-
-		RunInternal<TSystem>( Entity.All, args );
+		RunInternal<TSystem, TEntity>( Entity.All.OfType<TEntity>(), args );
 	}
 
-	private static void RunInternal<TSystem>( IEnumerable<IEntity> entities, object[] args ) where TSystem : ISystem
+	public void Run<TSystem>( params object[] args )
+		where TSystem : ISystem<IEntity>
+	{
+		RunInternal<TSystem, IEntity>( Entity.All, args );
+	}
+
+	private void RunInternal<TSystem, TEntity>( IEnumerable<TEntity> entities, object[] args )
+		where TSystem : ISystem<TEntity>
+		where TEntity : IEntity
 	{
 		foreach ( var component in gameManager!.Components.GetAll<TSystem>() )
 		{
@@ -78,15 +91,11 @@ public static class ECS
 			var query = QueryBuilder.From( entities );
 			component.FilterEntities( query );
 
-			component.Execute( query.Output, args );
+			if ( component.Execute( query.Output, args ) )
+				continue;
+
+			if ( configuration.SystemResolver is null || !configuration.SystemResolver( component ) )
+				Log.Error( $"{component} failed to find a system method to execute" );
 		}
-	}
-
-	private static void AssertGameManager( [CallerMemberName] string? method = default )
-	{
-		method ??= "Unknown";
-
-		if ( gameManager is null )
-			throw new InvalidOperationException( $"{method}: {nameof( Init )} must be called before ECS is used" );
 	}
 }

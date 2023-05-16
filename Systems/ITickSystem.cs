@@ -3,7 +3,11 @@ using System.Collections.Generic;
 
 namespace EntityComponentSystem.Systems;
 
-public interface ITickSystem : ISystem
+public interface ITickSystem<TEntity> : ISystem<TEntity> where TEntity : IEntity
 {
-	void Tick( IEnumerable<IEntity> entities );
+	void Tick( IEnumerable<TEntity> entities );
+}
+
+public interface ITickSystem : ITickSystem<IEntity>
+{
 }

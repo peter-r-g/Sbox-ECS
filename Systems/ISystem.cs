@@ -3,8 +3,8 @@ using System.Collections.Generic;
 
 namespace EntityComponentSystem.Systems;
 
-public interface ISystem : IComponent
+public interface ISystem<TEntity> : IComponent where TEntity : IEntity
 {
-	void FilterEntities( Query<IEntity> query );
-	void Execute( IEnumerable<IEntity> entities, params object[] args );
+	void FilterEntities( Query<TEntity> query );
+	bool Execute( IEnumerable<TEntity> entities, params object[] args );
 }

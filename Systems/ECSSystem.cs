@@ -5,7 +5,7 @@ using System.Diagnostics;
 
 namespace EntityComponentSystem.Systems;
 
-public abstract class ECSSystem : EntityComponent, ISystem
+public abstract class ECSSystem<TEntity> : EntityComponent, ISystem<TEntity> where TEntity : IEntity
 {
 	protected override void OnActivate()
 	{
@@ -18,13 +18,13 @@ public abstract class ECSSystem : EntityComponent, ISystem
 		}
 	}
 
-	public abstract void FilterEntities( Query<IEntity> query );
+	public abstract void FilterEntities( Query<TEntity> query );
 
-	public virtual void Execute( IEnumerable<IEntity> entities, params object[] args )
+	public virtual bool Execute( IEnumerable<TEntity> entities, params object[] args )
 	{
 		switch ( this )
 		{
-			case ISimulateSystem simulateSystem:
+			case ISimulateSystem<TEntity> simulateSystem:
 				if ( args.Length == 0 || args[0] is not IClient cl )
 					throw new InvalidOperationException();
 
@@ -32,12 +32,16 @@ public abstract class ECSSystem : EntityComponent, ISystem
 					simulateSystem.FrameSimulate( entities, cl );
 				else
 					simulateSystem.Simulate( entities, cl );
-				break;
-			case ITickSystem tickSystem:
+				return true;
+			case ITickSystem<TEntity> tickSystem:
 				tickSystem.Tick( entities );
-				break;
+				return true;
 			default:
-				throw new UnreachableException( $"No arm for implementing system. Consider overriding {nameof( ECSSystem )}.{nameof( Execute )}" );
+				return false;
 		}
 	}
+}
+
+public abstract class ECSSystem : ECSSystem<IEntity>
+{
 }
