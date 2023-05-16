@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace ECS;
+namespace EntityComponentSystem;
 
 public sealed class Query<TEntity> where TEntity : IEntity
 {
@@ -18,7 +18,7 @@ public sealed class Query<TEntity> where TEntity : IEntity
 
 	private List<TEntity> CurrentEntities { get; set; } = new();
 		 
-	private Query( IEnumerable<TEntity> entities )
+	internal Query( IEnumerable<TEntity> entities )
 	{
 		UseEnumerable = true;
 		Entities = entities;
@@ -26,7 +26,7 @@ public sealed class Query<TEntity> where TEntity : IEntity
 		Reset();
 	}
 
-	private Query( Func<IEnumerable<TEntity>> entitiesGetter )
+	internal Query( Func<IEnumerable<TEntity>> entitiesGetter )
 	{
 		UseEnumerable = false;
 		EntitiesGetter = entitiesGetter;
@@ -100,10 +100,11 @@ public sealed class Query<TEntity> where TEntity : IEntity
 
 	public Query<TEntity> Reset()
 	{
-		CurrentEntities = !UseEnumerable ? EntitiesGetter().ToList() : Entities.ToList();
+		CurrentEntities = !UseEnumerable ? EntitiesGetter!().ToList() : Entities!.ToList();
 
 		return this;
 	}
+}
 
 public static class QueryBuilder
 {
