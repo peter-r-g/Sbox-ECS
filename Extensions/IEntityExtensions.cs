@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System;
 
-namespace ParkourPainters.Extensions;
+namespace EntityComponentSystem.Extensions;
 
 /// <summary>
 /// Contains extension methods for the <see cref="IEntity"/> interface.
