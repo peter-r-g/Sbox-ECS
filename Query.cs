@@ -105,12 +105,14 @@ public sealed class Query<TEntity> where TEntity : IEntity
 		return this;
 	}
 
-	public static Query<T> From<T>( IEnumerable<T> entities ) where T : TEntity
+public static class QueryBuilder
+{
+	public static Query<T> From<T>( IEnumerable<T> entities ) where T : IEntity
 	{
 		return new Query<T>( entities );
 	}
 
-	public static Query<T> From<T>( Func<IEnumerable<T>> entitiesGetter ) where T : TEntity
+	public static Query<T> From<T>( Func<IEnumerable<T>> entitiesGetter ) where T : IEntity
 	{
 		return new Query<T>( entitiesGetter );
 	}
