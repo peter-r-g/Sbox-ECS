@@ -34,15 +34,23 @@ public sealed class Query<TEntity> where TEntity : IEntity
 		Reset();
 	}
 
-	public Query<TEntity> WithComponent<TComponent>() where TComponent : IComponent
+	public Query<TEntity> WithComponent<TComponent>( Func<TComponent, bool>? cb = null ) where TComponent : IComponent
 	{
 		for ( var i = 0; i < CurrentEntities.Count; i++ )
 		{
-			if ( CurrentEntities[i].Components.TryGet<TComponent>( out _ ) )
+			if ( !CurrentEntities[i].Components.TryGet<TComponent>( out var component ) )
+			{
+				CurrentEntities.RemoveAt( i );
+				i--;
 				continue;
+			}
 
-			CurrentEntities.RemoveAt( i );
-			i--;
+			if ( cb is not null && !cb( component ) )
+			{
+				CurrentEntities.RemoveAt( i );
+				i--;
+				continue;
+			}
 		}
 
 		return this;
