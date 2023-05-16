@@ -2,7 +2,6 @@
 using Sandbox;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 
 namespace ECS;
@@ -11,8 +10,6 @@ public sealed class Query<TEntity> where TEntity : IEntity
 {
 	public IEnumerable<TEntity> Output => CurrentEntities;
 
-	[MemberNotNullWhen( true, nameof( Entities ) )]
-	[MemberNotNullWhen( false, nameof( EntitiesGetter ) )]
 	private bool UseEnumerable { get; }
 
 	private IEnumerable<TEntity>? Entities { get; }
