@@ -13,7 +13,7 @@ internal sealed class QueryCache : IInternalQueryCache
 	/// <summary>
 	/// A dictionary containing all of the cached queries.
 	/// </summary>
-	private readonly Dictionary<IComponent, object> queryCache = new();
+	private readonly Dictionary<IComponent, IInternalQuery> queryCache = new();
 
 	/// <inheritdoc/>
 	public Query<TEntity> GetOrCache<TSystem, TEntity>( TSystem system, IEnumerable<TEntity> entities )
@@ -46,5 +46,21 @@ internal sealed class QueryCache : IInternalQueryCache
 	public void InvalidateFor( IComponent system )
 	{
 		queryCache.Remove( system );
+	}
+
+	/// <inheritdoc/>
+	public void InvalidateForCollection<TEntity>( IEnumerable<TEntity> collection )
+		where TEntity : IEntity
+	{
+		var cachesToRemove = new HashSet<IComponent>();
+
+		foreach ( var (system, query) in queryCache )
+		{
+			if ( ReferenceEquals( query.Entities, collection ) )
+				cachesToRemove.Add( system );
+		}
+
+		foreach ( var system in cachesToRemove )
+			queryCache.Remove( system );
 	}
 }

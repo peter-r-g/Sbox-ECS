@@ -11,12 +11,15 @@ namespace EntityComponentSystem.Queries;
 /// Encapsulates a filter to query a sequence of entities.
 /// </summary>
 /// <typeparam name="TEntity">The type of entities in the sequence.</typeparam>
-public sealed class Query<TEntity> : IEnumerable<TEntity> where TEntity : IEntity
+public sealed class Query<TEntity> : IEnumerable<TEntity>, IInternalQuery where TEntity : IEntity
 {
 	/// <summary>
 	/// The sequence of entities to filter.
 	/// </summary>
-	internal IEnumerable<TEntity> Entities { get; }
+	private IEnumerable<TEntity> Entities { get; }
+	/// <inheritdoc/>
+	IEnumerable IInternalQuery.Entities => Entities;
+
 	/// <summary>
 	/// A boolean array of indices to ignore in <see cref="Entities"/>.
 	/// </summary>

@@ -1,4 +1,5 @@
 ﻿using Sandbox;
+using System.Collections.Generic;
 
 namespace EntityComponentSystem.Cache;
 
@@ -17,4 +18,12 @@ public interface IQueryCache
 	/// </summary>
 	/// <param name="system">The system whose cache to invalidate.</param>
 	void InvalidateFor( IComponent system );
+
+	/// <summary>
+	/// Invalidates the cache for all queries using the underlying collection.
+	/// </summary>
+	/// <typeparam name="TEntity">The type of entity that is contained in the collection.</typeparam>
+	/// <param name="collection">The collection to check for in queries.</param>
+	void InvalidateForCollection<TEntity>( IEnumerable<TEntity> collection )
+		where TEntity : IEntity;
 }

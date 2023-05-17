@@ -29,4 +29,10 @@ internal sealed class FakeQueryCache : IInternalQueryCache
 	public void InvalidateFor( IComponent system )
 	{
 	}
+
+	/// <inheritdoc/>
+	public void InvalidateForCollection<TEntity>( IEnumerable<TEntity> collection )
+		where TEntity : IEntity
+	{
+	}
 }
