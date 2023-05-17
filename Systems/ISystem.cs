@@ -10,6 +10,11 @@ namespace EntityComponentSystem.Systems;
 public interface ISystem<TEntity> : IComponent where TEntity : IEntity
 {
 	/// <summary>
+	/// Whether or not the system supports its queries being cached.
+	/// </summary>
+	bool SupportsCaching { get; }
+
+	/// <summary>
 	/// Filters the incoming <see cref="Query{TEntity}"/>.
 	/// </summary>
 	/// <param name="query">The query to filter.</param>

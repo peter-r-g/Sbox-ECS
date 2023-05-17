@@ -1,9 +1,9 @@
-﻿using EntityComponentSystem.Systems;
+﻿using EntityComponentSystem.Cache;
+using EntityComponentSystem.Systems;
 using Sandbox;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 
 namespace EntityComponentSystem;
 
@@ -12,6 +12,20 @@ namespace EntityComponentSystem;
 /// </summary>
 public sealed class ECS
 {
+	/// <summary>
+	/// The only instance of <see cref="ECS"/> in existence.
+	/// </summary>
+	public static ECS? Instance { get; private set; }
+
+	/// <summary>
+	/// A publically facing cache interface for system queries.
+	/// </summary>
+	public IQueryCache Cache => cache;
+	/// <summary>
+	/// A cache for system queries.
+	/// </summary>
+	private readonly IInternalQueryCache cache;
+
 	/// <summary>
 	/// A reference to the manager of the game that is being played.
 	/// </summary>
@@ -34,11 +48,18 @@ public sealed class ECS
 	/// <exception cref="InvalidOperationException">Thrown when no <see cref="BaseGameManager"/> was found.</exception>
 	public ECS( ECSConfiguration configuration )
 	{
-		this.configuration = configuration;
+		Instance = this;
+
+		// Clone the configuration.
+		this.configuration = new( configuration );
+		// FIXME: Libraries don't have base referenced so this is the only way to get the game manager.
 		gameManager = Entity.All.OfType<BaseGameManager>().FirstOrDefault();
 
 		if ( gameManager is null )
 			throw new InvalidOperationException( "No game manager found, did you create this too early?" );
+
+		// Create cache.
+		cache = configuration.UseCaching ? new QueryCache() : new FakeQueryCache();
 	}
 
 	/// <summary>
@@ -116,6 +137,7 @@ public sealed class ECS
 		RunInternal<TSystem, IEntity>( Entity.All, args );
 	}
 
+	/// <summary>
 	/// The internal method to executing systems on a sequence of entities.
 	/// </summary>
 	/// <typeparam name="TSystem">The type of systems to execute.</typeparam>
@@ -134,13 +156,11 @@ public sealed class ECS
 			if ( component is IClientSystem && !Game.IsClient )
 				continue;
 
-			var query = QueryBuilder.From( entities );
-			component.FilterEntities( query );
-
-			if ( component.Execute( query.Output, args ) )
+			var query = cache.GetOrCache( component, entities );
+			if ( component.Execute( query, args ) )
 				continue;
 
-			if ( configuration.SystemResolver is null || !configuration.SystemResolver( component ) )
+			if ( configuration.SystemResolver is null || !configuration.SystemResolver( component, query, args ) )
 				Log.Error( $"{component} failed to find a system method to execute" );
 		}
 	}

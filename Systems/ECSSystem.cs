@@ -11,6 +11,9 @@ namespace EntityComponentSystem.Systems;
 public abstract class ECSSystem<TEntity> : EntityComponent, ISystem<TEntity> where TEntity : IEntity
 {
 	/// <inheritdoc/>
+	public abstract bool SupportsCaching { get; }
+
+	/// <inheritdoc/>
 	protected override void OnActivate()
 	{
 		base.OnActivate();

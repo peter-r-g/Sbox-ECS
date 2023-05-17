@@ -14,6 +14,10 @@ public sealed class ECSConfiguration
 	public static ECSConfiguration Default => new();
 
 	internal Func<IComponent, bool>? SystemResolver { get; private set; }
+	/// <summary>
+	/// Whether or not to use query caching.
+	/// </summary>
+	internal bool UseCaching { get; private set; } = true;
 
 	/// <summary>
 	/// Initializes a default instance of <see cref="ECSConfiguration"/>.
@@ -26,6 +30,18 @@ public sealed class ECSConfiguration
 	internal ECSConfiguration( ECSConfiguration other )
 	{
 		SystemResolver = other.SystemResolver;
+		UseCaching = other.UseCaching;
+	}
+
+	/// <summary>
+	/// Sets whether or not to use query caching.
+	/// </summary>
+	/// <param name="useCaching">Whether or not to use query caching.</param>
+	/// <returns>The same instance of <see cref="ECSConfiguration"/>.</returns>
+	public ECSConfiguration WithCaching( bool useCaching )
+	{
+		UseCaching = useCaching;
+		return this;
 	}
 
 	public ECSConfiguration WithSystemResolver( Func<IComponent, bool> systemResolver )
