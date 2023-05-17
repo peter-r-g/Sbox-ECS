@@ -20,8 +20,13 @@ internal sealed class QueryCache : IInternalQueryCache
 		where TSystem : ISystem<TEntity>
 		where TEntity : IEntity
 	{
-		if ( queryCache.TryGetValue( system, out var cachedQuery ) )
-			return (Query<TEntity>)cachedQuery;
+		if ( queryCache.TryGetValue( system, out var queryObj ) )
+		{
+			if ( queryObj is Query<TEntity> cachedQuery )
+				return cachedQuery;
+
+			queryCache.Remove( system );
+		}
 
 		var query = QueryBuilder.From( entities );
 		system.FilterEntities( query );
