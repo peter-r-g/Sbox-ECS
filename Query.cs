@@ -1,120 +1,201 @@
 ﻿using EntityComponentSystem.Extensions;
 using Sandbox;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace EntityComponentSystem;
 
-public sealed class Query<TEntity> where TEntity : IEntity
+/// <summary>
+/// Encapsulates a filter to query a sequence of entities.
+/// </summary>
+/// <typeparam name="TEntity">The type of entities in the sequence.</typeparam>
+public sealed class Query<TEntity> : IEnumerable<TEntity> where TEntity : IEntity
 {
-	public IEnumerable<TEntity> Output => CurrentEntities;
-
-	private bool UseEnumerable { get; }
-
-	private IEnumerable<TEntity>? Entities { get; }
-
-	private Func<IEnumerable<TEntity>>? EntitiesGetter { get; }
-
-	private List<TEntity> CurrentEntities { get; set; } = new();
-		 
+	/// <summary>
+	/// The sequence of entities to filter.
+	/// </summary>
+	private IEnumerable<TEntity> Entities { get; }
+	/// <summary>
+	/// A boolean array of indices to ignore in <see cref="Entities"/>.
+	/// </summary>
+	private BitArray IndicesToIgnore { get; }
+	
+	/// <summary>
+	/// Initializes an instance of <see cref="Query{TEntity}"/> with a sequence of entities to query.
+	/// </summary>
+	/// <param name="entities">The sequence of entities to query.</param>
 	internal Query( IEnumerable<TEntity> entities )
 	{
-		UseEnumerable = true;
 		Entities = entities;
-
-		Reset();
+		IndicesToIgnore = new BitArray( entities.Count() );
 	}
 
-	internal Query( Func<IEnumerable<TEntity>> entitiesGetter )
+	/// <summary>
+	/// Filters the sequence of entities to what has <see ref="TComponent"/>.
+	/// </summary>
+	/// <typeparam name="TComponent">The type of component to filter by.</typeparam>
+	/// <returns>The same instance of <see cref="Query{TEntity}"/>.</returns>
+	public Query<TEntity> WithComponent<TComponent>() where TComponent : IComponent
 	{
-		UseEnumerable = false;
-		EntitiesGetter = entitiesGetter;
+		using var enumerator = Entities.GetEnumerator();
+		var index = -1;
 
-		Reset();
-	}
-
-	public Query<TEntity> WithComponent<TComponent>( Func<TComponent, bool>? cb = null ) where TComponent : IComponent
-	{
-		for ( var i = 0; i < CurrentEntities.Count; i++ )
+		while ( enumerator.MoveNext() )
 		{
-			if ( !CurrentEntities[i].Components.TryGet<TComponent>( out var component ) )
-			{
-				CurrentEntities.RemoveAt( i );
-				i--;
-				continue;
-			}
+			var entity = enumerator.Current;
+			index++;
 
-			if ( cb is not null && !cb( component ) )
-			{
-				CurrentEntities.RemoveAt( i );
-				i--;
+			if ( IndicesToIgnore[index] )
 				continue;
-			}
+
+			if ( entity.Components.TryGet<TComponent>( out var component ) )
+				continue;
+
+			IndicesToIgnore[index] = true;
 		}
 
 		return this;
 	}
 
+	/// <summary>
+	/// Filters the sequence of entities to what does not have <see ref="TComponent"/>.
+	/// </summary>
+	/// <typeparam name="TComponent">The type of component to filter by.</typeparam>
+	/// <returns>The same instance of <see cref="Query{TEntity}"/>.</returns>
 	public Query<TEntity> WithoutComponent<TComponent>() where TComponent : IComponent
 	{
-		for ( var i = 0; i < CurrentEntities.Count; i++ )
+		using var enumerator = Entities.GetEnumerator();
+		var index = -1;
+
+		while ( enumerator.MoveNext() )
 		{
-			if ( !CurrentEntities[i].Components.TryGet<TComponent>( out _ ) )
+			var entity = enumerator.Current;
+			index++;
+
+			if ( IndicesToIgnore[index] )
 				continue;
 
-			CurrentEntities.RemoveAt( i );
-			i--;
+			if ( !entity.Components.TryGet<TComponent>( out _ ) )
+				continue;
+
+			IndicesToIgnore[index] = true;
 		}
 
 		return this;
 	}
 
+	/// <summary>
+	/// Filters the sequence of entities to what has the tag.
+	/// </summary>
+	/// <param name="tag">The tag to filter by.</param>
+	/// <returns>The same instance of <see cref="Query{TEntity}"/>.</returns>
 	public Query<TEntity> WithTag( ReadOnlySpan<char> tag )
 	{
-		for ( var i = 0; i < CurrentEntities.Count; i++ )
+		using var enumerator = Entities.GetEnumerator();
+		var index = -1;
+
+		while ( enumerator.MoveNext() )
 		{
-			if ( CurrentEntities[i].HasTag( tag ) )
+			var entity = enumerator.Current;
+			index++;
+
+			if ( IndicesToIgnore[index] )
 				continue;
 
-			CurrentEntities.RemoveAt( i );
-			i--;
+			if ( entity.HasTag( tag ) )
+				continue;
+
+			IndicesToIgnore[index] = true;
 		}
 
 		return this;
 	}
 
+	/// <summary>
+	/// Filters the sequence of entities to what does not have the tag.
+	/// </summary>
+	/// <param name="tag">The tag to filter by.</param>
+	/// <returns>The same instance of <see cref="Query{TEntity}"/>.</returns>
 	public Query<TEntity> WithoutTag( ReadOnlySpan<char> tag )
 	{
-		for ( var i = 0; i < CurrentEntities.Count; i++ )
+		using var enumerator = Entities.GetEnumerator();
+		var index = -1;
+
+		while ( enumerator.MoveNext() )
 		{
-			if ( !CurrentEntities[i].HasTag( tag ) )
+			var entity = enumerator.Current;
+			index++;
+
+			if ( IndicesToIgnore[index] )
 				continue;
 
-			CurrentEntities.RemoveAt( i );
-			i--;
+			if ( !entity.HasTag( tag ) )
+				continue;
+
+			IndicesToIgnore[index] = true;
 		}
 
 		return this;
 	}
 
+	/// <summary>
+	/// Resets the query's ignored indices for re-filtering.
+	/// </summary>
+	/// <returns>The same instance of <see cref="Query{TEntity}"/>.</returns>
 	public Query<TEntity> Reset()
 	{
-		CurrentEntities = !UseEnumerable ? EntitiesGetter!().ToList() : Entities!.ToList();
+		for ( var i = 0; i < IndicesToIgnore.Length; i++ )
+			IndicesToIgnore[i] = false;
 
 		return this;
+	}
+
+	/// <inheritdoc/>
+	public IEnumerator<TEntity> GetEnumerator()
+	{
+		using var enumerator = Entities.GetEnumerator();
+		var index = -1;
+
+		while ( enumerator.MoveNext() )
+		{
+			index++;
+
+			if ( !IndicesToIgnore[index] )
+				yield return enumerator.Current;
+		}
+	}
+
+	/// <inheritdoc/>
+	IEnumerator IEnumerable.GetEnumerator()
+	{
+		using var enumerator = Entities.GetEnumerator();
+		var index = -1;
+
+		while ( enumerator.MoveNext() )
+		{
+			index++;
+
+			if ( !IndicesToIgnore[index] )
+				yield return enumerator.Current;
+		}
 	}
 }
 
+/// <summary>
+/// A builder class for creating new queries.
+/// </summary>
 public static class QueryBuilder
 {
+	/// <summary>
+	/// Creates a new <see cref="Query{TEntity}"/> from a sequence of entities.
+	/// </summary>
+	/// <typeparam name="T">The type of entities in the sequence.</typeparam>
+	/// <param name="entities">The sequence for the query to filter.</param>
+	/// <returns>The created <see cref="Query{TEntity}"/>.</returns>
 	public static Query<T> From<T>( IEnumerable<T> entities ) where T : IEntity
 	{
 		return new Query<T>( entities );
-	}
-
-	public static Query<T> From<T>( Func<IEnumerable<T>> entitiesGetter ) where T : IEntity
-	{
-		return new Query<T>( entitiesGetter );
 	}
 }
