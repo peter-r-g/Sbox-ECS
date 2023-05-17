@@ -1,4 +1,5 @@
-﻿using EntityComponentSystem.Systems;
+﻿using EntityComponentSystem.Queries;
+using EntityComponentSystem.Systems;
 using Sandbox;
 using System.Collections.Generic;
 

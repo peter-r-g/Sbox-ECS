@@ -5,7 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace EntityComponentSystem;
+namespace EntityComponentSystem.Queries;
 
 /// <summary>
 /// Encapsulates a filter to query a sequence of entities.
@@ -16,12 +16,12 @@ public sealed class Query<TEntity> : IEnumerable<TEntity> where TEntity : IEntit
 	/// <summary>
 	/// The sequence of entities to filter.
 	/// </summary>
-	private IEnumerable<TEntity> Entities { get; }
+	internal IEnumerable<TEntity> Entities { get; }
 	/// <summary>
 	/// A boolean array of indices to ignore in <see cref="Entities"/>.
 	/// </summary>
 	private BitArray IndicesToIgnore { get; }
-	
+
 	/// <summary>
 	/// Initializes an instance of <see cref="Query{TEntity}"/> with a sequence of entities to query.
 	/// </summary>
@@ -180,22 +180,5 @@ public sealed class Query<TEntity> : IEnumerable<TEntity> where TEntity : IEntit
 			if ( !IndicesToIgnore[index] )
 				yield return enumerator.Current;
 		}
-	}
-}
-
-/// <summary>
-/// A builder class for creating new queries.
-/// </summary>
-public static class QueryBuilder
-{
-	/// <summary>
-	/// Creates a new <see cref="Query{TEntity}"/> from a sequence of entities.
-	/// </summary>
-	/// <typeparam name="T">The type of entities in the sequence.</typeparam>
-	/// <param name="entities">The sequence for the query to filter.</param>
-	/// <returns>The created <see cref="Query{TEntity}"/>.</returns>
-	public static Query<T> From<T>( IEnumerable<T> entities ) where T : IEntity
-	{
-		return new Query<T>( entities );
 	}
 }
