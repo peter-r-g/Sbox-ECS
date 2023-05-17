@@ -1,5 +1,6 @@
 ﻿using Sandbox;
 using System;
+using System.Collections;
 
 namespace EntityComponentSystem;
 
@@ -13,7 +14,10 @@ public sealed class ECSConfiguration
 	/// </summary>
 	public static ECSConfiguration Default => new();
 
-	internal Func<IComponent, bool>? SystemResolver { get; private set; }
+	/// <summary>
+	/// A callback method to resolve custom systems that should be executed.
+	/// </summary>
+	internal Func<IComponent, IEnumerable, object[], bool>? SystemResolver { get; private set; }
 	/// <summary>
 	/// Whether or not to use query caching.
 	/// </summary>
@@ -44,12 +48,12 @@ public sealed class ECSConfiguration
 		return this;
 	}
 
-	public ECSConfiguration WithSystemResolver( Func<IComponent, bool> systemResolver )
 	/// <summary>
 	/// Sets the callback method to resolve custom systems that should be executed.
 	/// </summary>
 	/// <param name="systemResolver">The callback method to resolve custom systems that should be executed.</param>
 	/// <returns>The same instance of <see cref="ECSConfiguration"/>.</returns>
+	public ECSConfiguration WithSystemResolver( Func<IComponent, IEnumerable, object[], bool> systemResolver )
 	{
 		SystemResolver = systemResolver;
 		return this;
