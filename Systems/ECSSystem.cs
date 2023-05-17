@@ -1,12 +1,16 @@
 ﻿using Sandbox;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 
 namespace EntityComponentSystem.Systems;
 
+/// <summary>
+/// A default implementation of a system that can be added to the world.
+/// </summary>
+/// <typeparam name="TEntity">The type of entities this system works with.</typeparam>
 public abstract class ECSSystem<TEntity> : EntityComponent, ISystem<TEntity> where TEntity : IEntity
 {
+	/// <inheritdoc/>
 	protected override void OnActivate()
 	{
 		base.OnActivate();
@@ -18,8 +22,10 @@ public abstract class ECSSystem<TEntity> : EntityComponent, ISystem<TEntity> whe
 		}
 	}
 
+	/// <inheritdoc/>
 	public abstract void FilterEntities( Query<TEntity> query );
 
+	/// <inheritdoc/>
 	public virtual bool Execute( IEnumerable<TEntity> entities, params object[] args )
 	{
 		switch ( this )
@@ -42,6 +48,9 @@ public abstract class ECSSystem<TEntity> : EntityComponent, ISystem<TEntity> whe
 	}
 }
 
+/// <summary>
+/// A default implementation of a system that can be added to the world with the <see cref="IEntity"/> constraint.
+/// </summary>
 public abstract class ECSSystem : ECSSystem<IEntity>
 {
 }

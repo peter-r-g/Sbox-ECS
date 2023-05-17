@@ -9,6 +9,14 @@ namespace EntityComponentSystem.Extensions;
 /// </summary>
 public static class IEntityExtensions
 {
+	#region Tags
+	/// <summary>
+	/// Returns whether or not an entity has a tag.
+	/// </summary>
+	/// <typeparam name="T">The type of the entity to check.</typeparam>
+	/// <param name="entity">The entity to check.</param>
+	/// <param name="tag">The tag to check for.</param>
+	/// <returns>Whether or not an entity has a tag.</returns>
 	public static bool HasTag<T>( this T entity, ReadOnlySpan<char> tag ) where T : IEntity
 	{
 		return HasTag( entity.TagList, tag );
@@ -110,7 +118,16 @@ public static class IEntityExtensions
 			return (tagList[tagIndex - 1] == ' ' && tagList[tagIndex + tagSpan.Length] == ' ') ||
 				HasTag( tagList[(tagIndex + tagSpan.Length + 1)..], tagSpan );
 	}
+	#endregion
 
+	#region WithComponent
+	/// <summary>
+	/// Returns a sequence of <see ref="TEntity"/> that contains <see ref="TComponent"/>.
+	/// </summary>
+	/// <typeparam name="TEntity">The type of entities to check.</typeparam>
+	/// <typeparam name="TComponent">The type of the component to check for.</typeparam>
+	/// <param name="entities">The sequence of entities to check.</param>
+	/// <returns>A sequence of <see ref="TEntity"/> that contains <see ref="TComponent"/>.</returns>
 	public static IEnumerable<TEntity> WithComponent<TEntity, TComponent>( this IEnumerable<TEntity> entities )
 		where TEntity : IEntity
 		where TComponent : IComponent
@@ -122,6 +139,14 @@ public static class IEntityExtensions
 		}
 	}
 
+	/// <summary>
+	/// Returns a sequence of <see ref="TEntity"/> that contains <see ref="TComponent1"/> and <see ref="TComponent2"/>.
+	/// </summary>
+	/// <typeparam name="TEntity">The type of entities to check.</typeparam>
+	/// <typeparam name="TComponent1">The type of the component to check for.</typeparam>
+	/// <typeparam name="TComponent2">The type of the component to check for.</typeparam>
+	/// <param name="entities">The sequence of entities to check.</param>
+	/// <returns>A sequence of <see ref="TEntity"/> that contains <see ref="TComponent1"/> and <see ref="TComponent2"/>.</returns>
 	public static IEnumerable<TEntity> WithComponents<TEntity, TComponent1, TComponent2>( this IEnumerable<TEntity> entities )
 		where TEntity : IEntity
 		where TComponent1 : IComponent
@@ -138,17 +163,33 @@ public static class IEntityExtensions
 			yield return entity;
 		}
 	}
+	#endregion
 
+	#region AsComponent
+	/// <summary>
+	/// Returns the <see ref="TComponent"/> on an entity.
+	/// </summary>
+	/// <typeparam name="TComponent">The type of component to get from the entity.</typeparam>
+	/// <param name="entity">The entity to get the component from.</param>
+	/// <returns>The <see ref="TComponent"/> on an entity.</returns>
 	public static TComponent AsComponent<TComponent>( this IEntity entity )
 		where TComponent : IComponent
 	{
 		return entity.Components.Get<TComponent>();
 	}
 
+	/// <summary>
+	/// Returns the <see ref="TComponent1"/> and <see ref="TComponent2"/> on an entity.
+	/// </summary>
+	/// <typeparam name="TComponent1">The first type of component to get from the entity.</typeparam>
+	/// <typeparam name="TComponent2">The second type of component to get from the entity.</typeparam>
+	/// <param name="entity">The entity to get the components from.</param>
+	/// <returns>The <see ref="TComponent1"/> and <see ref="TComponent2"/> on an entity.</returns>
 	public static (TComponent1, TComponent2) AsComponents<TComponent1, TComponent2>( this IEntity entity )
 		where TComponent1 : IComponent
 		where TComponent2 : IComponent
 	{
 		return (entity.Components.Get<TComponent1>(), entity.Components.Get<TComponent2>());
 	}
+	#endregion
 }
