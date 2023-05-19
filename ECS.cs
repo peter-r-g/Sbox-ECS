@@ -1,6 +1,7 @@
 ﻿using EntityComponentSystem.Cache;
 using EntityComponentSystem.Systems;
 using Sandbox;
+using Sandbox.Diagnostics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,6 +17,11 @@ public sealed class ECS
 	/// The only instance of <see cref="ECS"/> in existence.
 	/// </summary>
 	public static ECS? Instance { get; private set; }
+
+	/// <summary>
+	/// The logger for all ECS related logging.
+	/// </summary>
+	internal static Logger? Logger { get; private set; }
 
 	/// <summary>
 	/// A publically facing cache interface for system queries.
@@ -61,6 +67,8 @@ public sealed class ECS
 
 		// Create cache.
 		cache = configuration.UseCaching ? new QueryCache() : new FakeQueryCache();
+		// Create logger.
+		Logger = new Logger( "ECS" );
 	}
 
 	/// <summary>
@@ -77,6 +85,9 @@ public sealed class ECS
 			throw new ArgumentException( $"A system of type {typeof( TSystem ).Name} already exists", nameof( TSystem ) );
 
 		gameManager!.Components.Add( new TSystem() );
+
+		if ( Configuration.IsLoggerEnabled( Logs.SystemAdded ) )
+			Logger!.Info( $"System \"{typeof( TSystem ).Name}\" added" );
 	}
 
 	/// <summary>
@@ -98,6 +109,9 @@ public sealed class ECS
 		where TEntity : IEntity
 	{
 		gameManager!.Components.Add( system );
+
+		if ( Configuration.IsLoggerEnabled( Logs.SystemAdded ) )
+			Logger!.Info( $"System \"{system.GetType().Name}\" added" );
 	}
 
 	/// <summary>
@@ -161,8 +175,8 @@ public sealed class ECS
 			if ( component.Execute( query, args ) )
 				continue;
 
-				Log.Error( $"{component} failed to find a system method to execute" );
 			if ( Configuration.SystemResolver is null || !Configuration.SystemResolver( component, query, args ) )
+				Logger!.Error( $"{component} failed to find a system method to execute" );
 		}
 	}
 }

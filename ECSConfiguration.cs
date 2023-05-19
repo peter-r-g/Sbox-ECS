@@ -22,6 +22,14 @@ public sealed class ECSConfiguration
 	/// Whether or not to use query caching.
 	/// </summary>
 	internal bool UseCaching { get; private set; } = true;
+	/// <summary>
+	/// Whether or not debug logging is enabled.
+	/// </summary>
+	internal bool LoggingEnabled { get; private set; } = false;
+	/// <summary>
+	/// A bit flag containing all of the logs that should be enabled.
+	/// </summary>
+	internal Logs LogsEnabled { get; private set; } = Logs.All;
 
 	/// <summary>
 	/// Initializes a default instance of <see cref="ECSConfiguration"/>.
@@ -57,5 +65,26 @@ public sealed class ECSConfiguration
 	{
 		SystemResolver = systemResolver;
 		return this;
+	}
+
+	/// <summary>
+	/// Sets whether or not debug logging is enabled.
+	/// </summary>
+	/// <param name="loggingEnabled">Whether or not logging should be enabled.</param>
+	/// <returns>The same instance of <see cref="ECSConfiguration"/>.</returns>
+	public ECSConfiguration WithLogging( bool loggingEnabled )
+	{
+		LoggingEnabled = loggingEnabled;
+		return this;
+	}
+
+	/// <summary>
+	/// Returns whether or not a log is enabled.
+	/// </summary>
+	/// <param name="log">The log to check.</param>
+	/// <returns>Whether or not the log is enabled.</returns>
+	internal bool IsLoggerEnabled( Logs log )
+	{
+		return (LogsEnabled & log) != 0;
 	}
 }
