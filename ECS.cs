@@ -153,6 +153,27 @@ public sealed class ECS
 	}
 
 	/// <summary>
+	/// Executes systems with a sequence of entities.
+	/// </summary>
+	/// <typeparam name="TEntity">The type of entities to execute on.</typeparam>
+	/// <param name="entities">The sequence of entities to execute on.</param>
+	/// <param name="args">The arguments to pass to the system executor.</param>
+	public void Run<TEntity>( IEnumerable<TEntity> entities, params object[] args )
+		where TEntity : IEntity
+	{
+		RunInternal<ISystem<TEntity>, TEntity>( entities, args );
+	}
+
+	/// <summary>
+	/// Executes systems with all entities in S&amp;box.
+	/// </summary>
+	/// <param name="args">The arguments to pass to the system executor.</param>
+	public void Run( params object[] args )
+	{
+		RunInternal<ISystem<IEntity>, IEntity>( Entity.All, args );
+	}
+
+	/// <summary>
 	/// The internal method to executing systems on a sequence of entities.
 	/// </summary>
 	/// <typeparam name="TSystem">The type of systems to execute.</typeparam>
