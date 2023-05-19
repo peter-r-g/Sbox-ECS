@@ -134,6 +134,9 @@ public static class IEntityExtensions
 	{
 		foreach ( var entity in entities )
 		{
+			if ( entity.Components.Count == 0 )
+				continue;
+
 			if ( entity.Components.TryGet<TComponent>( out _ ) )
 				yield return entity;
 		}
@@ -154,6 +157,9 @@ public static class IEntityExtensions
 	{
 		foreach ( var entity in entities )
 		{
+			if ( entity.Components.Count == 0 )
+				continue;
+
 			if ( !entity.Components.TryGet<TComponent1>( out _ ) )
 				continue;
 
@@ -163,9 +169,42 @@ public static class IEntityExtensions
 			yield return entity;
 		}
 	}
+
+	/// <summary>
+	/// Returns a sequence of <see ref="TEntity"/> that contains <see ref="TComponent1"/>, <see ref="TComponent2"/>, and <see ref="TComponent3"/>.
+	/// </summary>
+	/// <typeparam name="TEntity">The type of entities to check.</typeparam>
+	/// <typeparam name="TComponent1">The type of the component to check for.</typeparam>
+	/// <typeparam name="TComponent2">The type of the component to check for.</typeparam>
+	/// <typeparam name="TComponent3">The type of the component to check for.</typeparam>
+	/// <param name="entities">The sequence of entities to check.</param>
+	/// <returns>A sequence of <see ref="TEntity"/> that contains <see ref="TComponent1"/>, <see ref="TComponent2"/>, and <see ref="TComponent3"/>.</returns>
+	public static IEnumerable<TEntity> WithComponents<TEntity, TComponent1, TComponent2, TComponent3>( this IEnumerable<TEntity> entities )
+		where TEntity : IEntity
+		where TComponent1 : IComponent
+		where TComponent2 : IComponent
+		where TComponent3 : IComponent
+	{
+		foreach ( var entity in entities )
+		{
+			if ( entity.Components.Count == 0 )
+				continue;
+
+			if ( !entity.Components.TryGet<TComponent1>( out _ ) )
+				continue;
+
+			if ( !entity.Components.TryGet<TComponent2>( out _ ) )
+				continue;
+
+			if ( !entity.Components.TryGet<TComponent3>( out _ ) )
+				continue;
+
+			yield return entity;
+		}
+	}
 	#endregion
 
-	#region AsComponent
+	#region AsComponent(s)
 	/// <summary>
 	/// Returns the <see ref="TComponent"/> on an entity.
 	/// </summary>
@@ -190,6 +229,22 @@ public static class IEntityExtensions
 		where TComponent2 : IComponent
 	{
 		return (entity.Components.Get<TComponent1>(), entity.Components.Get<TComponent2>());
+	}
+
+	/// <summary>
+	/// Returns the <see ref="TComponent1"/>, <see ref="TComponent2"/>, and <see ref="TComponent3"/> on an entity.
+	/// </summary>
+	/// <typeparam name="TComponent1">The first type of component to get from the entity.</typeparam>
+	/// <typeparam name="TComponent2">The second type of component to get from the entity.</typeparam>
+	/// <typeparam name="TComponent3">The third type of component to get from the entity.</typeparam>
+	/// <param name="entity">The entity to get the components from.</param>
+	/// <returns>The <see ref="TComponent1"/>, <see ref="TComponent2"/>, and <see ref="TComponent3"/> on an entity.</returns>
+	public static (TComponent1, TComponent2, TComponent3) AsComponents<TComponent1, TComponent2, TComponent3>( this IEntity entity )
+		where TComponent1 : IComponent
+		where TComponent2 : IComponent
+		where TComponent3 : IComponent
+	{
+		return (entity.Components.Get<TComponent1>(), entity.Components.Get<TComponent2>(), entity.Components.Get<TComponent3>());
 	}
 	#endregion
 }
