@@ -26,6 +26,9 @@ internal sealed class QueryCache : IInternalQueryCache
 				return cachedQuery;
 
 			queryCache.Remove( system );
+
+			if ( ECS.Instance!.Configuration.IsLoggerEnabled( Logs.UnexpectedCacheMiss ) )
+				ECS.Logger!.Warning( $"Unexpected cache miss for \"{system.GetType().Name}\", did you change the input entity type?" );
 		}
 
 		var query = QueryBuilder.From( entities );

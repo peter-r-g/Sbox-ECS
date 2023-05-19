@@ -27,13 +27,14 @@ public sealed class ECS
 	private readonly IInternalQueryCache cache;
 
 	/// <summary>
+	/// The configuration applied to the ECS world.
+	/// </summary>
+	internal readonly ECSConfiguration Configuration;
+
+	/// <summary>
 	/// A reference to the manager of the game that is being played.
 	/// </summary>
 	private readonly BaseGameManager? gameManager;
-	/// <summary>
-	/// The configuration applied to the ECS world.
-	/// </summary>
-	private readonly ECSConfiguration configuration;
 
 	/// <summary>
 	/// Initializes a default instance of <see cref="ECS"/>.
@@ -51,7 +52,7 @@ public sealed class ECS
 		Instance = this;
 
 		// Clone the configuration.
-		this.configuration = new( configuration );
+		this.Configuration = new( configuration );
 		// FIXME: Libraries don't have base referenced so this is the only way to get the game manager.
 		gameManager = Entity.All.OfType<BaseGameManager>().FirstOrDefault();
 
@@ -160,8 +161,8 @@ public sealed class ECS
 			if ( component.Execute( query, args ) )
 				continue;
 
-			if ( configuration.SystemResolver is null || !configuration.SystemResolver( component, query, args ) )
 				Log.Error( $"{component} failed to find a system method to execute" );
+			if ( Configuration.SystemResolver is null || !Configuration.SystemResolver( component, query, args ) )
 		}
 	}
 }
