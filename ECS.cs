@@ -45,7 +45,6 @@ public sealed class ECS
 	/// <summary>
 	/// Initializes a default instance of <see cref="ECS"/>.
 	/// </summary>
-	/// <exception cref="NotSupportedException">Thrown when an instance of <see cref="ECS"/> already exists.</exception>
 	/// <exception cref="InvalidOperationException">Thrown when no <see cref="BaseGameManager"/> was found.</exception>
 	public ECS() : this( ECSConfiguration.Default ) { }
 	/// <summary>
