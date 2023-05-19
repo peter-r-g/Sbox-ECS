@@ -25,6 +25,5 @@ public interface ISystem<TEntity> : IComponent where TEntity : IEntity
 	/// </summary>
 	/// <param name="entities">The sequence of entities to execute on.</param>
 	/// <param name="args">The arguments passed to the executor.</param>
-	/// <returns>Whether or not the executor found a system to run.</returns>
-	bool Execute( IEnumerable<TEntity> entities, params object[] args );
+	void Execute( IEnumerable<TEntity> entities, params object[] args );
 }

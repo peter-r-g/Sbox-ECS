@@ -172,11 +172,7 @@ public sealed class ECS
 				continue;
 
 			var query = cache.GetOrCache( component, entities );
-			if ( component.Execute( query, args ) )
-				continue;
-
-			if ( Configuration.SystemResolver is null || !Configuration.SystemResolver( component, query, args ) )
-				Logger!.Error( $"{component} failed to find a system method to execute" );
+			component.Execute( query, args );
 		}
 	}
 }

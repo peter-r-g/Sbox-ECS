@@ -15,10 +15,6 @@ public sealed class ECSConfiguration
 	public static ECSConfiguration Default => new();
 
 	/// <summary>
-	/// A callback method to resolve custom systems that should be executed.
-	/// </summary>
-	internal Func<IComponent, IEnumerable, object[], bool>? SystemResolver { get; private set; }
-	/// <summary>
 	/// Whether or not to use query caching.
 	/// </summary>
 	internal bool UseCaching { get; private set; } = true;
@@ -53,17 +49,6 @@ public sealed class ECSConfiguration
 	public ECSConfiguration WithCaching( bool useCaching )
 	{
 		UseCaching = useCaching;
-		return this;
-	}
-
-	/// <summary>
-	/// Sets the callback method to resolve custom systems that should be executed.
-	/// </summary>
-	/// <param name="systemResolver">The callback method to resolve custom systems that should be executed.</param>
-	/// <returns>The same instance of <see cref="ECSConfiguration"/>.</returns>
-	public ECSConfiguration WithSystemResolver( Func<IComponent, IEnumerable, object[], bool> systemResolver )
-	{
-		SystemResolver = systemResolver;
 		return this;
 	}
 
