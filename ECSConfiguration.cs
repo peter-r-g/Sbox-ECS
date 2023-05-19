@@ -71,6 +71,6 @@ public sealed class ECSConfiguration
 	/// <returns>Whether or not the log is enabled.</returns>
 	internal bool IsLoggerEnabled( Logs log )
 	{
-		return (LogsEnabled & log) != 0;
+		return LoggingEnabled && (LogsEnabled & log) != 0;
 	}
 }
