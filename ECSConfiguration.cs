@@ -37,8 +37,9 @@ public sealed class ECSConfiguration
 	/// <param name="other"></param>
 	internal ECSConfiguration( ECSConfiguration other )
 	{
-		SystemResolver = other.SystemResolver;
 		UseCaching = other.UseCaching;
+		LoggingEnabled = other.LoggingEnabled;
+		LogsEnabled = other.LogsEnabled;
 	}
 
 	/// <summary>
